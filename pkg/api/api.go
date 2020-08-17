@@ -14,9 +14,9 @@ import (
 )
 
 type Api struct {
-	logger *zap.logger
-	router *mux.router
-	conf Conf.conf
+	logger *zap.Logger
+	router *mux.Router
+	conf	Conf.Conf
 }
 
 func NewApi(logger *zap.Logger, conf Conf.Conf) Api {
@@ -49,12 +49,12 @@ func (a Api) load_routes() error {
 }
 
 func (a Api) Serve() {
-	server := http:Server{
-		Addr:           fmt.Sprintf(":%s", a.conf.API_PORT)
+	server := http.Server{
+		Addr:           fmt.Sprintf(":%s", a.conf.API_PORT),
 		Handler:        a.router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   20 * time.Second,
-		MaxHeaderBytes: 120 * time.Second,
+		IdleTimeout: 	120 * time.Second,
 	}
 	
 	a.logger.Info(fmt.Sprintf("Server serving on port %s", a.conf.API_PORT))

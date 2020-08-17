@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestApi(*testing.T) {
+func TestApi(t *testing.T) {
 	c := zap.NewProductionConfig()
 	c.OutputPaths = []string{"stdout"}
 	logger, err := c.Build()
@@ -29,6 +29,6 @@ func TestApi(*testing.T) {
 	rr := httptest.NewRecorder()
 	a.router.ServeHTTP(rr, req) //testing the endpoint
 	if code := rr.Code; code != http.StatusOK {
-		t.Errorf("expected status %d but got %d\n", http.StatusOk, code)
+		t.Errorf("expected status %d but got %d\n", http.StatusOK, code)
 	}
 }
