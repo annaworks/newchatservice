@@ -14,14 +14,14 @@ type Conf struct {
 }
 
 func NewConf(logger *zap.Logger) Conf {
-	c := &Conf{}
+	c := Conf{}
 
-	err := envconfig.Process("", c)
+	err := envconfig.Process("", &c) //requires a pointer for 2nd param
 	if err != nil {
 		logger.Fatal("Envconfig could not get env", zap.Error(err))
 	}
 
 	logger.Info("Envconfig success")
 
-	return *c // TODO: WHY ARE WE RETURNING TYPE *?
+	return c // TODO: WHY ARE WE RETURNING TYPE *?
 }

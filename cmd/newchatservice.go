@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/annaworks/newchatservice/pkg/api"
 	Conf "github.com/annaworks/newchatservice/pkg/conf"
+
 	"go.uber.org/zap"
 )
 
 func main() {
 	c := zap.NewProductionConfig()
-	c.OutputPaths = []string("stdout")
+	c.OutputPaths = []string{"stdout"}
 	logger, err := c.Build()
 	if err != nil {
 	log.Fatalf("can't initialize zap logger: %v", err)
@@ -20,4 +21,8 @@ func main() {
 	// env
 	conf := Conf.NewConf(logger.Named("conf_logger"))
 
+	// api
+	api := api.NewApi(logger.Named("api_logger"), conf)
+	api.Init()
+	api.Serve()
 }
