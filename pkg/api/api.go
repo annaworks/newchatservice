@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/annaworks/newchatservice/pkg/api/handlers"
-	Conf "github.com/annaworks/newchatservice/pkg/conf"
+	"github.com/annaworks/surubot/pkg/api/handlers"
+	Conf "github.com/annaworks/surubot/pkg/conf"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"

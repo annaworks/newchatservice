@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/annaworks/newchatservice/pkg/api"
-	Conf "github.com/annaworks/newchatservice/pkg/conf"
+	"github.com/annaworks/surubot/pkg/api"
+	Conf "github.com/annaworks/surubot/pkg/conf"
 
 	"go.uber.org/zap"
 )
@@ -14,7 +14,7 @@ func main() {
 	c.OutputPaths = []string{"stdout"}
 	logger, err := c.Build()
 	if err != nil {
-	log.Fatalf("can't initialize zap logger: %v", err)
+		log.Fatalf("can't initialize zap logger: %v", err)
 	}
 	defer logger.Sync()
 

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	Conf "github.com/annaworks/newchatservice/pkg/conf"
+	Conf "github.com/annaworks/surubot/pkg/conf"
 
 	"go.uber.org/zap"
 )
