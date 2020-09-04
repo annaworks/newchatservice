@@ -45,6 +45,12 @@ func (a Api) load_routes() error {
 	}
 	v1.HandleFunc("/health", health_handler.Ping).Methods(http.MethodGet)
 
+	// slash
+	slash_handler := handlers.Slash_handler{
+		Logger: a.logger.Named("slash_handler"),
+	}
+	v1.HandleFunc("/slash", slash_handler.HandleSlashCommand).Methods(http.MethodPost)
+
 	return nil // Returns nil always when no error. No error check for now, this will always return as successful
 }
 
