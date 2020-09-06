@@ -1,4 +1,4 @@
-package handlers
+package slack
 
 import (
 	"encoding/json"
@@ -6,25 +6,35 @@ import (
 	"fmt"
 
 	"go.uber.org/zap"
+	"github.com/annaworks/surubot/pkg/api"
 	Conf "github.com/annaworks/surubot/pkg/conf"
 	"github.com/slack-go/slack"
 )
 
-type Slash_handler struct {
+type SlashService struct {
 	Logger *zap.Logger
 	Conf Conf.Conf
 	Api *slack.Client
 }
 
-func NewSlashHandler(logger *zap.Logger, conf Conf.Conf) Slash_handler {
-	return Slash_handler{
+func NewSlashService(logger *zap.Logger, conf Conf.Conf) *SlashService {
+	return &SlashService{
 		Logger: logger,
 		Conf: conf,
 		Api: slack.New(conf.SLACK_TOKEN),
 	}
 }
 
-func (s Slash_handler) HandleSlashCommand(w http.ResponseWriter, r *http.Request) {
+func (s SlashService) GetSlashRoute() *api.Route{
+	return &api.Route{
+		Path: "/api/v1/slash",
+		Handler: s.HandleSlashCommand,
+		Method: http.MethodPost,
+		Name: "slash",
+	}
+}
+
+func (s SlashService) HandleSlashCommand(w http.ResponseWriter, r *http.Request) {
 	s.Logger.Info("Received a slash command")
 
 	slash, err := slack.SlashCommandParse(r)
@@ -36,7 +46,6 @@ func (s Slash_handler) HandleSlashCommand(w http.ResponseWriter, r *http.Request
 	fmt.Printf("Command called: %v", slash.Command)
 
 	switch slash.Command {
-		//slash.UserName, slash.Text
 	case "/suru":
 		m := NewQuestionMessage(slash.Text, slash.UserName)
 		msg := m.BuildMessage()
@@ -68,7 +77,6 @@ const (
 	answerButtonText = "Answer"
 	answerButtonId   = "answerButton"
 )
-
 
 type questionMessage struct {
 	text 			string

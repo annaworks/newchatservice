@@ -2,11 +2,9 @@ package api
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/annaworks/surubot/pkg/api/handlers"
 	Conf "github.com/annaworks/surubot/pkg/conf"
 
 	"github.com/gorilla/mux"
@@ -19,43 +17,32 @@ type Api struct {
 	conf	Conf.Conf
 }
 
-func NewApi(logger *zap.Logger, conf Conf.Conf) Api {
-	return Api{
+func NewApi(logger *zap.Logger, conf Conf.Conf) *Api {
+	return &Api{
 		logger: logger,
 		router: mux.NewRouter().StrictSlash(true),
 		conf: conf,
 	}
 }
 
-func (a Api) Init() {
-	err := a.load_routes()
-	if err != nil {
-		a.logger.Fatal("Could not load routes", zap.Error(err))
-	}
-
-	a.logger.Info("Loaded routes")
+type Route struct {
+	Path string
+	Handler http.HandlerFunc
+	Method string
+	Name string
 }
 
-func (a Api) load_routes() error {
-	v1 := a.router.PathPrefix("/api/v1").Subrouter()
-
-	// health
-	health_handler := handlers.Health_handler{
-		Logger: a.logger.Named("health_handler"),
-	}
-	v1.HandleFunc("/health", health_handler.Ping).Methods(http.MethodGet)
-
-	// slash
-	slash_handler := handlers.Slash_handler{
-		Logger: a.logger.Named("slash_handler"),
-	}
-	v1.HandleFunc("/slash", slash_handler.HandleSlashCommand).Methods(http.MethodPost)
-
-	return nil // Returns nil always when no error. No error check for now, this will always return as successful
+func (a *Api) LoadRoute(r *Route) *Api {
+	a.router.HandleFunc(r.Path, r.Handler).
+		Methods(r.Method).
+		Name(r.Name)
+	
+	a.logger.Info(fmt.Sprintf("route loaded: %s", r.Name))
+	return a
 }
 
-func (a Api) Serve() {
-	server := http.Server{
+func (a *Api) Serve() {
+	s := http.Server{
 		Addr:           fmt.Sprintf(":%s", a.conf.API_PORT),
 		Handler:        a.router,
 		ReadTimeout:    10 * time.Second,
@@ -65,5 +52,7 @@ func (a Api) Serve() {
 	
 	a.logger.Info(fmt.Sprintf("Server serving on port %s", a.conf.API_PORT))
 
-	log.Fatal(server.ListenAndServe())
+	if err := s.ListenAndServe(); err != nil {
+		a.logger.Fatal("Error in serving server", zap.Error(err))
+	}
 }
