@@ -14,20 +14,27 @@ import (
 )
 
 func TestApi(t *testing.T) {
-	c := zap.NewProductionConfig()
-	c.OutputPaths = []string{"stdout"}
-	logger, err := c.Build()
+	z := zap.NewProductionConfig()
+	z.OutputPaths = []string{"stdout"}
+	logger, err := z.Build()
 	if err != nil {	
 		log.Fatal (fmt.Sprintf("Could not init zap logger: %v", err))
 	}
 	defer logger.Sync()
 
-	a := api.NewApi(logger, Conf.Conf{})
-	a.Init()
+	c := Conf.NewConf(logger.Named("conf_logger"))
+
+	api := api.NewApi(logger.Named("api_logger"), c)
+
+	h := New(logger.Named("health_logger"))
+
+	api.LoadRoute(h.GetHealthRoute())
 
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/health", nil)
 	rr := httptest.NewRecorder()
-	a.router.ServeHTTP(rr, req) //testing the endpoint
+
+	// testing the endpoint
+	api.Router.ServeHTTP(rr, req) 
 	if code := rr.Code; code != http.StatusOK {
 		t.Errorf("expected status %d but got %d\n", http.StatusOK, code)
 	}

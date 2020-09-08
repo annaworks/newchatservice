@@ -12,16 +12,16 @@ import (
 )
 
 type Api struct {
-	logger *zap.Logger
-	router *mux.Router
-	conf	Conf.Conf
+	Logger *zap.Logger
+	Router *mux.Router
+	Conf	Conf.Conf
 }
 
 func NewApi(logger *zap.Logger, conf Conf.Conf) *Api {
 	return &Api{
-		logger: logger,
-		router: mux.NewRouter().StrictSlash(true),
-		conf: conf,
+		Logger: logger,
+		Router: mux.NewRouter().StrictSlash(true),
+		Conf: conf,
 	}
 }
 
@@ -33,26 +33,26 @@ type Route struct {
 }
 
 func (a *Api) LoadRoute(r *Route) *Api {
-	a.router.HandleFunc(r.Path, r.Handler).
+	a.Router.HandleFunc(r.Path, r.Handler).
 		Methods(r.Method).
 		Name(r.Name)
 	
-	a.logger.Info(fmt.Sprintf("route loaded: %s", r.Name))
+	a.Logger.Info(fmt.Sprintf("route loaded: %s", r.Name))
 	return a
 }
 
 func (a *Api) Serve() {
 	s := http.Server{
-		Addr:           fmt.Sprintf(":%s", a.conf.API_PORT),
-		Handler:        a.router,
+		Addr:           fmt.Sprintf(":%s", a.Conf.API_PORT),
+		Handler:        a.Router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   20 * time.Second,
 		IdleTimeout: 	120 * time.Second,
 	}
 	
-	a.logger.Info(fmt.Sprintf("Server serving on port %s", a.conf.API_PORT))
+	a.Logger.Info(fmt.Sprintf("Server serving on port %s", a.Conf.API_PORT))
 
 	if err := s.ListenAndServe(); err != nil {
-		a.logger.Fatal("Error in serving server", zap.Error(err))
+		a.Logger.Fatal("Error in serving server", zap.Error(err))
 	}
 }
