@@ -26,7 +26,7 @@ func TestApi(t *testing.T) {
 
 	api := api.NewApi(logger.Named("api_logger"), c)
 
-	h := New(logger.Named("health_logger"))
+	h := NewHealthService(logger.Named("health_logger"))
 
 	api.LoadRoute(h.GetHealthRoute())
 
