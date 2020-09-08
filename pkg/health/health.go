@@ -12,7 +12,7 @@ type HealthService struct {
 	Logger *zap.Logger
 }
 
-func New(logger *zap.Logger) *HealthService {
+func NewHealthService(logger *zap.Logger) *HealthService {
 	return &HealthService{
 		Logger: logger,
 	}

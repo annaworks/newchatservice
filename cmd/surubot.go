@@ -27,7 +27,7 @@ func main() {
 	api := api.NewApi(logger.Named("api_logger"), c)
 
 	// health service
-	h := health.New(logger.Named("health_logger"))
+	h := health.NewHealthService(logger.Named("health_logger"))
 
 	// slack service
 	s := slack.NewSlashService(logger.Named("slack_slash_logger"), c)
