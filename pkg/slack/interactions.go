@@ -118,17 +118,27 @@ func getQuestionText(payload slack.InteractionCallback) (string, error)  {
 	return message, nil
 }
 
+const (
+	cancelBtnText 	= "Cancel"
+	closeBtnText 	= "Close"
+	submitBtnText 	= "Submit"
+
+	viewModalTitle 	= "View answers"
+	viewModalEmptyState = "There are currently no answers for this question."
+	answerModalTitle = "Add an answer"
+	answerModalPlaceholder = "Write something"
+)
+
 func (p ButtonActionPayload) newViewRequest() slack.ModalViewRequest {
-	titleText := slack.NewTextBlockObject("plain_text", "View answers", false, false)
-	closeText := slack.NewTextBlockObject("plain_text", "Close", false, false)
-	submitText := slack.NewTextBlockObject("plain_text", "Add answer", false, false)
+	titleText := slack.NewTextBlockObject("plain_text", viewModalTitle, false, false)
+	closeText := slack.NewTextBlockObject("plain_text", closeBtnText, false, false)
 
 	headerContent := fmt.Sprintf("*Question:*\n %v", p.Question)
 	headerText := slack.NewTextBlockObject("mrkdwn", headerContent, false, false)
 	headerSection := slack.NewSectionBlock(headerText, nil, nil)
 
 	// Empty state on initial view
-	emptyContentText := slack.NewTextBlockObject("plain_text", "There are currently no answers for this question.", false, false)
+	emptyContentText := slack.NewTextBlockObject("plain_text", viewModalEmptyState, false, false)
 	emptyContentSection := slack.NewSectionBlock(emptyContentText, nil, nil)
 
 	blocks := slack.Blocks{
@@ -142,18 +152,17 @@ func (p ButtonActionPayload) newViewRequest() slack.ModalViewRequest {
 	modalRequest.Type = slack.ViewType("modal")
 	modalRequest.Title = titleText
 	modalRequest.Close = closeText
-	modalRequest.Submit = submitText
 	modalRequest.Blocks = blocks
 	return modalRequest
 }
 
 func (p ButtonActionPayload) newAnswerRequest() slack.ModalViewRequest {
-	titleText := slack.NewTextBlockObject("plain_text", "Add an answer", false, false)
-	closeText := slack.NewTextBlockObject("plain_text", "Cancel", false, false)
-	submitText := slack.NewTextBlockObject("plain_text", "Submit", false, false)
+	titleText := slack.NewTextBlockObject("plain_text", answerModalTitle, false, false)
+	closeText := slack.NewTextBlockObject("plain_text", cancelBtnText, false, false)
+	submitText := slack.NewTextBlockObject("plain_text", submitBtnText, false, false)
 
 	answerText := slack.NewTextBlockObject("plain_text", p.Question, false, false)
-	answerPlaceholder := slack.NewTextBlockObject("plain_text", "Write something", false, false)
+	answerPlaceholder := slack.NewTextBlockObject("plain_text", answerModalPlaceholder, false, false)
 	answerElement := slack.NewPlainTextInputBlockElement(answerPlaceholder, "answer")
 	answerElement.Multiline = true
 	answer := slack.NewInputBlock("Answer", answerText, answerElement)
