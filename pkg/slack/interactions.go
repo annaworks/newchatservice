@@ -20,14 +20,27 @@ func (s SlackService) GetInteractionsRoute() *api.Route{
 	}
 }
 
-func (s SlackService) processPayload(r *http.Request) (*ButtonActionPayload, error) {
+func (s SlackService) HandleInteractionsRequest(w http.ResponseWriter, r *http.Request) {
+	s.Logger.Info("Received an interactions request")
+
+	p, err := processPayload(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("Error: Unknown action")))
+		s.Logger.Error("Error processing interaction callback payload", zap.Error(err))
+		return
+	}
+	fmt.Printf("Payload: %+v", p)
+}
+
+func processPayload(r *http.Request) (*ButtonActionPayload, error) {
 	var payload slack.InteractionCallback
 	err := json.Unmarshal([]byte(r.FormValue("payload")), &payload)
 	if err != nil {
 		return &ButtonActionPayload{}, fmt.Errorf("Could not parse ineraction callback payload: %v", err)
 	}
 
-	message, err := s.getQuestionText(payload)
+	message, err := getQuestionText(payload)
 	if err != nil {
 		return &ButtonActionPayload{}, fmt.Errorf("Could not find question text from interaction callback payload: %v", err)
 	}
@@ -40,19 +53,6 @@ func (s SlackService) processPayload(r *http.Request) (*ButtonActionPayload, err
 		payload.TriggerID,
 		payload.Type,
 	), nil
-}
-
-func (s SlackService) HandleInteractionsRequest(w http.ResponseWriter, r *http.Request) {
-	s.Logger.Info("Received an interactions request")
-
-	p, err := s.processPayload(r)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Error: Unknown action")))
-		s.Logger.Error("Error processing interaction callback payload", zap.Error(err))
-		return
-	}
-	fmt.Printf("Payload: %+v", p)
 }
 
 type ButtonActionPayload struct {
@@ -75,7 +75,7 @@ func newButtonActionPayload(question, username, userID, buttonClicked, triggerID
 	}
 }
 
-func (s SlackService) getQuestionText(payload slack.InteractionCallback) (string, error)  {
+func getQuestionText(payload slack.InteractionCallback) (string, error)  {
 	var message string
 	for _, b := range payload.Message.Msg.Blocks.BlockSet {
 		if b.BlockType() == "section"  {
