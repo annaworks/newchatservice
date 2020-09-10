@@ -48,9 +48,16 @@ func main() {
 	if err != nil {
 		logger.Fatal("could not create es client", zap.Error(err))
 	}
-	err = e.CreateDB(IndexQuestions, EsQuestionMapping)
+
+	exists, err := e.DBExists(IndexQuestions)
 	if err != nil {
-		logger.Fatal("could not create es index", zap.Error(err))
+		logger.Fatal("could not check es index", zap.Error(err))
+	}
+	if !exists {
+		err = e.CreateDB(IndexQuestions, EsQuestionMapping)
+		if err != nil {
+			logger.Fatal("could not create es index", zap.Error(err))
+		}
 	}
 
 	// api
