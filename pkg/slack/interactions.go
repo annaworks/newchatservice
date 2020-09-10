@@ -41,6 +41,12 @@ func (s SlackService) HandleInteractionsRequest(w http.ResponseWriter, r *http.R
 			if err != nil {
 				fmt.Printf("Error opening view: %s", err)
 			}
+		case answerButtonID:
+			modalRequest := p.newAnswerRequest()
+			_, err = s.Api.OpenView(p.TriggerID, modalRequest)
+			if err != nil {
+				fmt.Printf("Error opening view: %s", err)
+			}
 		default:
 			fmt.Printf("Unknown interaction type block action: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -129,6 +135,32 @@ func (p ButtonActionPayload) newViewRequest() slack.ModalViewRequest {
 		BlockSet: []slack.Block{
 			headerSection,
 			emptyContentSection,
+		},
+	}
+
+	var modalRequest slack.ModalViewRequest
+	modalRequest.Type = slack.ViewType("modal")
+	modalRequest.Title = titleText
+	modalRequest.Close = closeText
+	modalRequest.Submit = submitText
+	modalRequest.Blocks = blocks
+	return modalRequest
+}
+
+func (p ButtonActionPayload) newAnswerRequest() slack.ModalViewRequest {
+	titleText := slack.NewTextBlockObject("plain_text", "Add an answer", false, false)
+	closeText := slack.NewTextBlockObject("plain_text", "Cancel", false, false)
+	submitText := slack.NewTextBlockObject("plain_text", "Submit", false, false)
+
+	answerText := slack.NewTextBlockObject("plain_text", p.Question, false, false)
+	answerPlaceholder := slack.NewTextBlockObject("plain_text", "Write something", false, false)
+	answerElement := slack.NewPlainTextInputBlockElement(answerPlaceholder, "answer")
+	answerElement.Multiline = true
+	answer := slack.NewInputBlock("Answer", answerText, answerElement)
+
+	blocks := slack.Blocks{
+		BlockSet: []slack.Block{
+			answer,
 		},
 	}
 
