@@ -30,7 +30,7 @@ func main() {
 	h := health.NewHealthService(logger.Named("health_logger"))
 
 	// slack service
-	s := slack.NewSlashService(logger.Named("slack_slash_logger"), c)
+	s := slack.NewSlackService(logger.Named("slack_logger"), c)
 
 	api.LoadRoute(h.GetHealthRoute())
 	api.LoadRoute(s.GetSlashRoute())
