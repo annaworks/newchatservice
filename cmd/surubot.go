@@ -34,5 +34,6 @@ func main() {
 
 	api.LoadRoute(h.GetHealthRoute())
 	api.LoadRoute(s.GetSlashRoute())
+	api.LoadRoute(s.GetInteractionsRoute())
 	api.Serve()
 }
