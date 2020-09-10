@@ -57,10 +57,10 @@ func (s SlackService) HandleSlashCommand(w http.ResponseWriter, r *http.Request)
 const (
 	contextText    = "Asked by @%v"
 	viewButtonText = "View"
-	viewButtonId   = "viewButton"
+	viewButtonID   = "viewButton"
 
 	answerButtonText = "Answer"
-	answerButtonId   = "answerButton"
+	answerButtonID   = "answerButton"
 )
 
 type questionMessage struct {
@@ -89,10 +89,10 @@ func (q questionMessage) BuildMessage() slack.Message {
 
 	// Approve and Deny Buttons
 	viewBtnTxt := slack.NewTextBlockObject("plain_text", viewButtonText, false, false)
-	viewBtn := slack.NewButtonBlockElement("", viewButtonId, viewBtnTxt)
+	viewBtn := slack.NewButtonBlockElement("", viewButtonID, viewBtnTxt)
 
 	answerBtnTxt := slack.NewTextBlockObject("plain_text", answerButtonText, false, false)
-	answerBtn := slack.NewButtonBlockElement("", answerButtonId, answerBtnTxt)
+	answerBtn := slack.NewButtonBlockElement("", answerButtonID, answerBtnTxt)
 
 	actionBlock := slack.NewActionBlock("", viewBtn, answerBtn)
 
