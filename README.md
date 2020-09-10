@@ -6,6 +6,10 @@ This slack bot service is built for a way to save questions and answers to a dat
 
 The service interfaces with the Slack API using an API built with Golang.
 
+## Dependencies
+
+Makes use of the [slack-go library](https://github.com/slack-go/slack) to implement the slack-api with the go api.
+
 ## Local Development
 #### Running Go API from project location
 Copy .env.example and configure ENV variables 
