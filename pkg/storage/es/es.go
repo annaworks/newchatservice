@@ -3,8 +3,7 @@ package es
 import (
 	"context"
 	"errors"
-
-	"github.com/annaworks/surubot/pkg/storage"
+	
 	"github.com/olivere/elastic/v7"
 )
 
@@ -12,19 +11,19 @@ const (
 	DocType = "_doc"
 )
 
-type es struct {
+type ES struct {
 	client *elastic.Client
 	host string
 }
 
-func New(host string) *es {
-	return &es{
+func New(host string) *ES {
+	return &ES{
 		host: host,
 		client: nil,
 	}
 }
 
-func (e *es) Configure() (storage.Storager, error) {
+func (e *ES) Configure() (*ES, error) {
 	client, err := elastic.NewClient(
 		elastic.SetURL(e.host),
 		elastic.SetSniff(false),
@@ -38,7 +37,7 @@ func (e *es) Configure() (storage.Storager, error) {
 	return e, nil
 }
 
-func (e es) CreateDB(name, schema string) error {
+func (e ES) CreateIndex(name, schema string) error {
 	ctx := context.Background()
 
 	res, err := e.client.CreateIndex(name).BodyString(schema).Do(ctx)
@@ -53,7 +52,7 @@ func (e es) CreateDB(name, schema string) error {
 	return nil
 }
 
-func (e es) DBExists(name string) (bool, error) {
+func (e ES) IndexExists(name string) (bool, error) {
 	ctx := context.Background()
 
 	exists, err := e.client.IndexExists(name).Do(ctx)
@@ -64,7 +63,7 @@ func (e es) DBExists(name string) (bool, error) {
 	return exists, nil
 }
 
-func (e es) Insert(name string, body interface{}) (interface{}, error) {
+func (e ES) Insert(name string, body interface{}) (interface{}, error) {
 	ctx := context.Background()
 	resp, err := e.client.Index().
 								Type(DocType).
@@ -77,3 +76,4 @@ func (e es) Insert(name string, body interface{}) (interface{}, error) {
 
 	return resp, nil
 }
+

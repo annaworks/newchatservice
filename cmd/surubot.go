@@ -7,29 +7,11 @@ import (
 	"github.com/annaworks/surubot/pkg/health"
 	"github.com/annaworks/surubot/pkg/slack"
 	"github.com/annaworks/surubot/pkg/storage/es"
+	"github.com/annaworks/surubot/pkg/knowledge"
 	Conf "github.com/annaworks/surubot/pkg/conf"
 
 	"go.uber.org/zap"
 )
-
-const (
-	IndexQuestions = "questions"
-
-	EsQuestionMapping = `{
-		"settings": {
-			"number_of_shards": 1,
-			"number_of_replicas": 1
-		},
-		"mappings": {
-			"properties": {
-				"@timestamp": { "type": "date" },
-				"question": { "type": "text" },
-				"user": { "type": "keyword" }
-			}
-		}
-	}`
-)
-
 
 func main() {
 	z := zap.NewProductionConfig()
@@ -49,12 +31,23 @@ func main() {
 		logger.Fatal("could not create es client", zap.Error(err))
 	}
 
-	exists, err := e.DBExists(IndexQuestions)
+	exists, err := e.IndexExists(knowledge.IndexQuestions)
 	if err != nil {
 		logger.Fatal("could not check es index", zap.Error(err))
 	}
 	if !exists {
-		err = e.CreateDB(IndexQuestions, EsQuestionMapping)
+		err = e.CreateIndex(knowledge.IndexQuestions, knowledge.EsQuestionMapping)
+		if err != nil {
+			logger.Fatal("could not create es index", zap.Error(err))
+		}
+	}
+
+	exists, err = e.IndexExists(knowledge.IndexAnswers)
+	if err != nil {
+		logger.Fatal("could not check es index", zap.Error(err))
+	}
+	if !exists {
+		err = e.CreateIndex(knowledge.IndexAnswers, knowledge.EsAnswerMapping)
 		if err != nil {
 			logger.Fatal("could not create es index", zap.Error(err))
 		}
@@ -67,7 +60,7 @@ func main() {
 	h := health.NewHealthService(logger.Named("health_logger"))
 
 	// slack service
-	s := slack.NewSlackService(logger.Named("slack_logger"), c)
+	s := slack.NewSlackService(logger.Named("slack_logger"), c, e)
 
 	api.LoadRoute(h.GetHealthRoute())
 	api.LoadRoute(s.GetSlashRoute())
