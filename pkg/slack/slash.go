@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/zap"
 	"github.com/annaworks/surubot/pkg/api"
+	"github.com/annaworks/surubot/pkg/knowledge"
 	"github.com/slack-go/slack"
 )
 
@@ -33,6 +34,13 @@ func (s SlackService) HandleSlashCommand(w http.ResponseWriter, r *http.Request)
 	switch slash.Command {
 	case "/suru":
 		m := NewQuestionMessage(slash.Text, slash.UserName)
+		_, err := s.Storage.Insert(knowledge.IndexQuestions, knowledge.NewQuestion(m.text, m.username))
+		if err != nil {
+			s.Logger.Error("Could not insert question")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		msg := m.BuildMessage()
 
 		b, err := json.MarshalIndent(msg, "", "    ")
